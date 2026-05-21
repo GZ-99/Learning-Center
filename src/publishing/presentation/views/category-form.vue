@@ -1,29 +1,43 @@
 <script setup>
-import {useI18n} from "vue-i18n"
-import {useRoute, useRouter} from "vue-router"
+import {useI18n} from "vue-i18n";
+import {useRoute, useRouter} from "vue-router";
 import usePublishingStore from "../../application/publishing.store.js";
-import {computed} from "vue";
-import {Button as PvButton, InputText as PvInputText} from "primevue";
+import {computed, onMounted, ref} from "vue";
+import {Category} from "../../domain/model/category.entity.js";
 
-const {t} = useI18n();
+const { t } = useI18n();
 const route = useRoute();
 const router = useRouter();
 const store = usePublishingStore();
 const {errors, addCategory, updateCategory} = store;
 
+/** @type {import('vue').Ref<{name: string}>} Presentation form state mapped to Category entity fields. */
 const form = ref({name: ''});
+/** Determines whether the current route represents edition of an existing category. */
 const isEdit = computed(() => !!route.params.id);
 
+/**
+ * Reads one category entity from application state.
+ * @param {number|string} id - Category identifier.
+ * @returns {Category|undefined}
+ */
 function getCategoryById(id) {
   return store.getCategoryById(id);
 }
 
-const navigateBack = () => router.push({ name: 'publishing-categories'});
+/** Navigates back to the categories list route. */
+const navigateBack = () => router.push({ name: 'publishing-categories' });
 
+/**
+ * Creates a Category entity from form state and delegates
+ * add/update behavior to Publishing application services.
+ *
+ * @returns {void}
+ */
 const saveCategory = () => {
   const category = new Category({
     id: isEdit.value ? route.params.id : null,
-    name: form.value.name,
+    name: form.value.name
   });
   isEdit.value ? updateCategory(category) : addCategory(category);
   navigateBack();
@@ -40,20 +54,20 @@ onMounted(() => {
 </script>
 
 <template>
-<div class="p-4">
-  <h1>{{ isEdit ? t('category.edit-title') : t('category.new-title')}}</h1>
-  <form @submit.prevent="saveCategory">
-    <div class="field mb-3">
-      <label for="name">{{t('category.name')}}</label>
-      <pv-input-text id="name" v-model="form.name" class="w-full" required />
+  <div class="p-4">
+    <h1>{{ isEdit ? t('category.edit-title') : t('category.new-title')}}</h1>
+    <form @submit.prevent="saveCategory">
+      <div class="field mb-3">
+        <label for="name">{{ t('category.name')}}</label>
+        <pv-input-text id="name" v-model="form.name" class="w-full" required/>
+      </div>
+      <pv-button :label="t('category.save')" icon="pi pi-save" type="submit"/>
+      <pv-button :label="t('category.cancel')" class="ml-2" severity="secondary" @click="navigateBack"/>
+    </form>
+    <div v-if="errors.length" class="text-red-500 mt-3">
+      {{t('errors.occurred')}}: {{ errors.map(e => e.message).join(', ') }}
     </div>
-    <pv-button :label="t('category.save')" icon="pi pi-save" type="submit"/>
-    <pv-button :label="t('category.cancel')" icon="ml-2" severity="secondary" @click="navigateBack"/>
-  </form>
-  <div v-if="errors.length" class="text-red-500 mt-3">
-    {{t('errors.ocurred')}}: {{errors.map(e => e.message).join(', ')}}
   </div>
-</div>
 </template>
 
 <style scoped>
