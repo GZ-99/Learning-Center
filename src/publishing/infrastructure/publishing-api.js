@@ -1,4 +1,4 @@
-import {BaseApi} from "../../shared/infrastructure/base-api.js";
+import {BaseApi} from "../../shared/infrastructure/base.js";
 import {BaseEndpoint} from "../../shared/infrastructure/base-endpoint.js";
 
 const categoriesEndpointPath = import.meta.env.VITE_CATEGORIES_ENDPOINT_PATH;
